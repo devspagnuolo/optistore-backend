@@ -8,19 +8,82 @@ datasource db {
 }
 
 model User {
-  id       String   @id @default(uuid())
-  name     String
-  email    String   @unique
-  password String
-  products Product[]
+  id            String    @id @default(uuid())
+  name          String
+  email         String    @unique
+  password      String
+  type          UserType
+  cnpj          String?   @unique
+  cpf           String?   @unique
+  companyName   String?
+  responsible   String?
+  logoUrl       String?
+  contactPhone  String?
+  addresses     Address[]
+  products      Product[]
+  salesAsBuyer  Sale[]    @relation("Comprador")
+  salesAsSeller Sale[]    @relation("Vendedor")
+  faturas       Fatura[]
+  createdAt     DateTime  @default(now())
+}
+
+model Address {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  street    String
+  number    String
+  city      String
+  state     String
+  zipCode   String
+  country   String
+  createdAt DateTime @default(now())
 }
 
 model Product {
-  id          String  @id @default(uuid())
+  id          String    @id @default(uuid())
   name        String
   description String
   price       Float
-  imageUrl    String
-  user        User    @relation(fields: [userId], references: [id])
+  tipoVenda   TipoVenda
   userId      String
+  user        User      @relation(fields: [userId], references: [id])
+  sales       Sale[]
+  createdAt   DateTime  @default(now())
+}
+
+model Sale {
+  id          String    @id @default(uuid())
+  productId   String
+  product     Product   @relation(fields: [productId], references: [id])
+  compradorId String
+  comprador   User      @relation("Comprador", fields: [compradorId], references: [id])
+  vendedorId  String
+  vendedor    User      @relation("Vendedor", fields: [vendedorId], references: [id])
+  valor       Float
+  tipoVenda   TipoVenda
+  status      String
+  createdAt   DateTime  @default(now())
+}
+
+model Fatura {
+  id            String   @id @default(uuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id])
+  mesRef        String
+  totalVendas   Float
+  valorComissao Float
+  status        String
+  createdAt     DateTime @default(now())
+}
+
+enum UserType {
+  FORNECEDOR
+  REVENDEDOR
+  CLIENTE
+}
+
+enum TipoVenda {
+  B2B
+  B2C
 }
