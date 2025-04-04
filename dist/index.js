@@ -16,7 +16,18 @@ app.use((0, cors_1.default)());
 app.use(express_1.default.json());
 app.use('/api', auth_1.default);
 app.use('/api/products', products_1.default);
-const PORT = process.env.PORT || 3000;
+// ✅ Rota raiz para manter app ativo
+app.get('/', (req, res) => {
+    res.send('🔁 OptiStore backend online!');
+});
+// ✅ Tratamento global de erros
+process.on('uncaughtException', (err) => {
+    console.error('❌ Uncaught Exception:', err);
+});
+process.on('unhandledRejection', (reason) => {
+    console.error('❌ Unhandled Rejection:', reason);
+});
+const PORT = Number(process.env.PORT) || 8080;
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
