@@ -1,4 +1,4 @@
-FROM node:18-alpine
+FROM node:18-slim
 
 WORKDIR /app
 
@@ -6,9 +6,6 @@ COPY package.json ./
 COPY package-lock.json ./
 
 RUN npm install
-
-# Corrige permissão do tsc (!!!)
-RUN chmod +x ./node_modules/.bin/tsc
 
 COPY . .
 
