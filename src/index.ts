@@ -1,10 +1,21 @@
-import { Router } from 'express';
-import { register } from '../controllers/register';
-import { login } from '../controllers/login';
+import express from 'express';
+import cors from 'cors';
+import dotenv from 'dotenv';
+import { PrismaClient } from '@prisma/client';
+import authRoutes from './routes/auth';
+import productRoutes from './routes/products';
 
-const router = Router();
+dotenv.config();
+const app = express();
+const prisma = new PrismaClient();
 
-router.post('/register', register);
-router.post('/login', login);
+app.use(cors());
+app.use(express.json());
 
-export default router;
+app.use('/api', authRoutes);
+app.use('/api/products', productRoutes);
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});

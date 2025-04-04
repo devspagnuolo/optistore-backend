@@ -1,20 +1,29 @@
-import { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
+import { Request, Response } from 'express';
 
 const prisma = new PrismaClient();
 
-export const createProduct = async (req: Request, res: Response) => {
-  const { name, description, price, imageUrl } = req.body;
-  const userId = (req as any).userId;
+export async function createProduct(req: Request, res: Response) {
+  const { name, description, price, imageUrl, tipoVenda } = req.body;
+  const userId = (req as any).userId; // Pegando do middleware auth
 
-  const product = await prisma.product.create({
-    data: { name, description, price, imageUrl, userId },
-  });
+  try {
+    const product = await prisma.product.create({
+      data: {
+        name,
+        description,
+        price,
+        imageUrl,
+        tipoVenda,
+        user: {
+          connect: { id: userId }
+        }
+      }
+    });
 
-  res.status(201).json(product);
-};
-
-export const getProducts = async (_: Request, res: Response) => {
-  const products = await prisma.product.findMany({ include: { user: true } });
-  res.json(products);
-};
+    res.status(201).json(product);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Erro ao criar produto' });
+  }
+}
