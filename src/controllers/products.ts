@@ -1,29 +1,31 @@
-import { PrismaClient } from '@prisma/client';
 import { Request, Response } from 'express';
+import { PrismaClient, TipoVenda } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-export async function createProduct(req: Request, res: Response) {
-  const { name, description, price, imageUrl, tipoVenda } = req.body;
-  const userId = (req as any).userId; // Pegando do middleware auth
-
+export const createProduct = async (req: Request, res: Response) => {
   try {
+    const { name, description, price, tipoVenda, imageUrl } = req.body;
+    const userId = (req as any).userId;
+
+    if (!name || !description || !price || !tipoVenda) {
+      return res.status(400).json({ error: 'Campos obrigatórios ausentes.' });
+    }
+
     const product = await prisma.product.create({
       data: {
         name,
         description,
         price,
-        imageUrl,
         tipoVenda,
-        user: {
-          connect: { id: userId }
-        }
-      }
+        imageUrl,
+        userId,
+      },
     });
 
-    res.status(201).json(product);
+    return res.status(201).json(product);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Erro ao criar produto' });
+    console.error('Erro ao criar produto:', error);
+    return res.status(500).json({ error: 'Erro interno ao criar produto.' });
   }
-}
+};
